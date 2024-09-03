@@ -1,0 +1,123 @@
+-- Passo 1: Criar o banco de dados
+CREATE DATABASE IF NOT EXISTS RestauranteDB;
+USE RestauranteDB;
+
+-- Passo 2: Criar as tabelas
+
+-- Tabela Clientes
+CREATE TABLE IF NOT EXISTS Clientes (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15),
+    email VARCHAR(100)
+);
+
+-- Tabela Mesas
+CREATE TABLE IF NOT EXISTS Mesas (
+    id_mesa INT AUTO_INCREMENT PRIMARY KEY,
+    numero_mesa INT NOT NULL,
+    capacidade INT NOT NULL
+);
+
+-- Tabela Pedidos
+CREATE TABLE IF NOT EXISTS Pedidos (
+    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_mesa INT NOT NULL,
+    data_pedido DATETIME NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente),
+    FOREIGN KEY (id_mesa) REFERENCES Mesas(id_mesa)
+);
+
+-- Tabela Itens_Pedido
+CREATE TABLE IF NOT EXISTS Itens_Pedido (
+    id_item INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT NOT NULL,
+    descricao_item VARCHAR(255) NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_pedido) REFERENCES Pedidos(id_pedido) ON DELETE CASCADE
+);
+
+-- Passo 3: Inserir dados
+
+-- Inserir dados na tabela Clientes
+INSERT INTO Clientes (nome, telefone, email) VALUES
+('João Silva', '123456789', 'joao.silva@example.com'),
+('Maria Oliveira', '987654321', 'maria.oliveira@example.com');
+
+-- Inserir dados na tabela Mesas
+INSERT INTO Mesas (numero_mesa, capacidade) VALUES
+(1, 4),
+(2, 2),
+(3, 6);
+
+-- Inserir dados na tabela Pedidos
+INSERT INTO Pedidos (id_cliente, id_mesa, data_pedido, total) VALUES
+(1, 1, '2024-09-01 19:00:00', 150.00),
+(2, 2, '2024-09-01 20:00:00', 75.00);
+
+-- Inserir dados na tabela Itens_Pedido
+INSERT INTO Itens_Pedido (id_pedido, descricao_item, quantidade, preco_unitario) VALUES
+(1, 'Pizza Margherita', 2, 25.00),
+(1, 'Refrigerante', 3, 5.00),
+(2, 'Espaguete à Carbonara', 1, 30.00),
+(2, 'Cerveja', 2, 10.00);
+
+-- Passo 4: Consultar dados
+
+-- Listar todos os clientes
+SELECT * FROM Clientes;
+
+-- Listar todas as mesas
+SELECT * FROM Mesas;
+
+-- Listar todos os pedidos
+SELECT * FROM Pedidos;
+
+-- Mostrar todos os itens de um pedido específico e o total do pedido
+-- Substitua 1 pelo id_pedido desejado
+SELECT 
+    i.descricao_item AS 'Descrição Item',
+    i.quantidade AS 'Quantidade',
+    i.preco_unitario AS 'Preço Unitário',
+    (i.quantidade * i.preco_unitario) AS 'Total Item',
+    p.total AS 'Total Pedido'
+FROM 
+    Itens_Pedido i
+JOIN 
+    Pedidos p ON i.id_pedido = p.id_pedido
+WHERE 
+    i.id_pedido = 1;
+
+-- Passo 5: Atualizar dados
+
+-- Atualizar informações de um cliente
+UPDATE Clientes
+SET nome = 'João Silva Junior', telefone = '111222333', email = 'joao.junior@example.com'
+WHERE id_cliente = 1;
+
+-- Atualizar informações de uma mesa
+UPDATE Mesas
+SET capacidade = 8
+WHERE id_mesa = 3;
+
+-- Passo 6: Deletar dados
+
+-- Excluir um pedido e todos os itens relacionados a ele
+-- Substitua 1 pelo id_pedido desejado
+START TRANSACTION;
+
+-- Excluir o pedido
+DELETE FROM Pedidos
+WHERE id_pedido = 1;
+
+-- A exclusão dos itens do pedido será feita automaticamente devido ao ON DELETE CASCADE
+COMMIT;
+
+-- Excluir todos os dados na tabela Itens_Pedido relacionados a um pedido específico
+-- Isso é redundante após o ON DELETE CASCADE
+-- DELETE FROM Itens_Pedido
+-- WHERE id_pedido = 1;
+
